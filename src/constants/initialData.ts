@@ -287,26 +287,26 @@ export const INITIAL_LUXURY: Luxury[] = [
     "imageUrl": "EconomClassAuto/Changan Alsvin.jpg"
   },
   {
-    "id": "car_econom_chery_tiggo_4",
-    "name": "Chery Tiggo 4",
+    "id": "car_econom_chery_tiggo_4_pro",
+    "name": "Chery Tiggo 4 Pro",
     "cost": 7944,
     "prestige": 53,
     "count": 0,
     "icon": "car",
     "category": "car",
     "class": "economy",
-    "imageUrl": "EconomClassAuto/Chery Tiggo 4"
+    "imageUrl": "EconomClassAuto/Chery Tiggo 4 Pro.jpg"
   },
   {
-    "id": "car_econom_chery_tiggo_4_pro",
-    "name": "Chery Tiggo 4 Pro",
+    "id": "car_econom_chery_tiggo_4",
+    "name": "Chery Tiggo 4",
     "cost": 8667,
     "prestige": 58,
     "count": 0,
     "icon": "car",
     "category": "car",
     "class": "economy",
-    "imageUrl": "EconomClassAuto/Chery Tiggo 4 Pro.jpg"
+    "imageUrl": "EconomClassAuto/Chery Tiggo 4.jpg"
   },
   {
     "id": "car_econom_chevrolet_aveo",
