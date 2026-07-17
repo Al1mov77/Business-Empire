@@ -109,11 +109,40 @@ export default function DashboardScreen() {
   }));
 
   const rankNames = {
-    en: { emperor: 'Sector Emperor', galactic_tycoon: 'Galactic Tycoon', multitrillionaire: 'Multitrillionaire', trillionaire: 'Trillionaire', billionaire: 'Billionaire', millionaire: 'Millionaire', executive: 'Executive', entrepreneur: 'Entrepreneur', novice: 'Novice' },
-    ru: { emperor: 'Секторный Император', galactic_tycoon: 'Галактический Магнат', multitrillionaire: 'Мультитриллионер', trillionaire: 'Триллионер', billionaire: 'Миллиардер', millionaire: 'Миллионер', executive: 'Директор', entrepreneur: 'Предприниматель', novice: 'Новичок' }
+    en: {
+      universal_emperor: 'Universal Emperor',
+      cosmic_deity: 'Cosmic Deity',
+      multiverse_emperor: 'Multiversal Overlord',
+      emperor: 'Sector Emperor',
+      galactic_tycoon: 'Galactic Tycoon',
+      multitrillionaire: 'Multitrillionaire',
+      trillionaire: 'Trillionaire',
+      billionaire: 'Billionaire',
+      millionaire: 'Millionaire',
+      executive: 'Executive',
+      entrepreneur: 'Entrepreneur',
+      novice: 'Novice'
+    },
+    ru: {
+      universal_emperor: 'Император Вселенной',
+      cosmic_deity: 'Космическое Божество',
+      multiverse_emperor: 'Владыка Мультиверса',
+      emperor: 'Секторный Император',
+      galactic_tycoon: 'Галактический Магнат',
+      multitrillionaire: 'Мультитриллионер',
+      trillionaire: 'Триллионер',
+      billionaire: 'Миллиардер',
+      millionaire: 'Миллионер',
+      executive: 'Директор',
+      entrepreneur: 'Предприниматель',
+      novice: 'Новичок'
+    }
   };
   
   const rankKey =
+    netWorth >= 1e18 ? 'universal_emperor' :
+    netWorth >= 100e15 ? 'cosmic_deity' :
+    netWorth >= 10e15 ? 'multiverse_emperor' :
     netWorth >= 1e15 ? 'emperor' :
     netWorth >= 100e12 ? 'galactic_tycoon' :
     netWorth >= 10e12 ? 'multitrillionaire' :

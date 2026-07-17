@@ -7,12 +7,13 @@ import { useGameStore } from '@/store/gameStore';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { t } from '@/utils/translations';
 import { INITIAL_REAL_ESTATE, INITIAL_LUXURY } from '@/constants/initialData';
+import { LOCAL_IMAGES } from '@/constants/localImages';
 import {
   Building, Home, Building2, Ship, Car, Plane, Trophy, MapPin, Sparkles, Award,
   Clock, Gem, Vault, Bitcoin, Coins, Rocket, Smile, Eye,
 } from 'lucide-react-native';
 
-type TabType = 'real_estate' | 'car' | 'plane' | 'jewelry';
+type TabType = 'real_estate' | 'car' | 'yacht' | 'plane' | 'jewelry' | 'garage';
 type ClassFilter = 'all' | 'economy' | 'medium' | 'business' | 'luxury';
 
 interface SafeImageProps {
@@ -23,7 +24,12 @@ interface SafeImageProps {
 }
 
 function SafeImage({ uri, fallback, style, resizeMode = 'cover' }: SafeImageProps) {
-  const [source, setSource] = useState(uri ? { uri } : { uri: fallback });
+  const [source, setSource] = useState(() => {
+    if (uri && LOCAL_IMAGES[uri]) {
+      return LOCAL_IMAGES[uri];
+    }
+    return uri ? { uri } : { uri: fallback };
+  });
   const [error, setError] = useState(false);
 
   return (
@@ -51,9 +57,11 @@ export default function AssetsScreen() {
   const prestige = useGameStore((state) => state.prestige);
   const rawRealEstate = useGameStore((state) => state.realEstate);
   const buyRealEstate = useGameStore((state) => state.buyRealEstate);
+  const sellRealEstate = useGameStore((state) => state.sellRealEstate);
   const upgradeProperty = useGameStore((state) => state.upgradeProperty);
   const rawLuxury = useGameStore((state) => state.luxury);
   const buyLuxury = useGameStore((state) => state.buyLuxury);
+  const sellLuxury = useGameStore((state) => state.sellLuxury);
   const crypto = useGameStore((state) => state.crypto);
 
   // Dynamic merge of INITIAL data to resolve missing properties or URLs from old saves
@@ -83,13 +91,23 @@ export default function AssetsScreen() {
   // Counters for tabs (using total count of owned items)
   const countRealEstate = realEstate.reduce((sum, r) => sum + r.count, 0);
   const countCars = luxury.filter(l => l.category === 'car').reduce((sum, l) => sum + l.count, 0);
+  const countYachts = luxury.filter(l => l.category === 'yacht').reduce((sum, l) => sum + l.count, 0);
   const countPlanes = luxury.filter(l => l.category === 'plane').reduce((sum, l) => sum + l.count, 0);
   const countJewelry = luxury.filter(l => l.category === 'jewelry').reduce((sum, l) => sum + l.count, 0);
+
+  // Garage combined list of owned properties and luxury transport
+  const ownedRealEstate = realEstate.filter(r => r.count > 0).map(r => ({ ...r, type: 'real_estate' as const }));
+  const ownedLuxury = luxury.filter(l => l.count > 0).map(l => ({ ...l, type: 'luxury' as const }));
+  const garageItems = [...ownedRealEstate, ...ownedLuxury];
+  const countGarage = garageItems.reduce((sum, item) => sum + item.count, 0);
 
   // Filter lists based on tab and sub-class selection
   const getFilteredItems = () => {
     if (activeTab === 'real_estate') {
       return realEstate.filter(r => classFilter === 'all' || r.class === classFilter);
+    }
+    if (activeTab === 'garage') {
+      return garageItems;
     }
     const subList = luxury.filter(l => l.category === activeTab);
     return subList.filter(l => classFilter === 'all' || l.class === classFilter);
@@ -128,7 +146,7 @@ export default function AssetsScreen() {
         </View>
       </View>
 
-      {/* Primary Tabs (Real Estate, Cars, Planes, Jewelry) */}
+      {/* Primary Tabs (Real Estate, Cars, Yachts, Planes, Jewelry, Garage) */}
       <View style={{ height: 48, borderBottomWidth: 0.5, borderBottomColor: theme.border, backgroundColor: theme.backgroundElement }}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'center' }}>
           <Pressable
@@ -152,6 +170,16 @@ export default function AssetsScreen() {
           </Pressable>
 
           <Pressable
+            onPress={() => handleTabChange('yacht')}
+            style={[styles.tabBtn, activeTab === 'yacht' && [styles.tabBtnActive, { borderBottomColor: theme.accent }]]}
+          >
+            <Ship size={14} color={activeTab === 'yacht' ? theme.accent : theme.textSecondary} />
+            <ThemedText style={[styles.tabLabel, { color: activeTab === 'yacht' ? theme.accent : theme.textSecondary }]}>
+              {t('yachtsTab', language)} ({countYachts})
+            </ThemedText>
+          </Pressable>
+
+          <Pressable
             onPress={() => handleTabChange('plane')}
             style={[styles.tabBtn, activeTab === 'plane' && [styles.tabBtnActive, { borderBottomColor: theme.accent }]]}
           >
@@ -170,57 +198,69 @@ export default function AssetsScreen() {
               {t('jewelryTab', language)} ({countJewelry})
             </ThemedText>
           </Pressable>
+
+          <Pressable
+            onPress={() => handleTabChange('garage')}
+            style={[styles.tabBtn, activeTab === 'garage' && [styles.tabBtnActive, { borderBottomColor: theme.red }]]}
+          >
+            <Vault size={14} color={activeTab === 'garage' ? theme.red : theme.textSecondary} />
+            <ThemedText style={[styles.tabLabel, { color: activeTab === 'garage' ? theme.red : theme.textSecondary }]}>
+              {t('garageTab', language)} ({countGarage})
+            </ThemedText>
+          </Pressable>
         </ScrollView>
       </View>
 
       {/* Class Filters Sub-Bar */}
-      <View style={[styles.filterBar, { backgroundColor: theme.background }]}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
-          <Pressable
-            onPress={() => setClassFilter('all')}
-            style={[styles.filterChip, classFilter === 'all' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
-          >
-            <ThemedText style={[styles.filterChipText, classFilter === 'all' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
-              {t('allClass', language)}
-            </ThemedText>
-          </Pressable>
-          <Pressable
-            onPress={() => setClassFilter('economy')}
-            style={[styles.filterChip, classFilter === 'economy' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
-          >
-            <ThemedText style={[styles.filterChipText, classFilter === 'economy' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
-              {t('ecoClass', language)}
-            </ThemedText>
-          </Pressable>
-          {activeTab !== 'real_estate' ? (
+      {activeTab !== 'garage' && (
+        <View style={[styles.filterBar, { backgroundColor: theme.background }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
             <Pressable
-              onPress={() => setClassFilter('medium')}
-              style={[styles.filterChip, classFilter === 'medium' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
+              onPress={() => setClassFilter('all')}
+              style={[styles.filterChip, classFilter === 'all' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
             >
-              <ThemedText style={[styles.filterChipText, classFilter === 'medium' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
-                {t('medClass', language)}
+              <ThemedText style={[styles.filterChipText, classFilter === 'all' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
+                {t('allClass', language)}
               </ThemedText>
             </Pressable>
-          ) : (
             <Pressable
-              onPress={() => setClassFilter('business')}
-              style={[styles.filterChip, classFilter === 'business' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
+              onPress={() => setClassFilter('economy')}
+              style={[styles.filterChip, classFilter === 'economy' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
             >
-              <ThemedText style={[styles.filterChipText, classFilter === 'business' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
-                {t('busClass', language)}
+              <ThemedText style={[styles.filterChipText, classFilter === 'economy' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
+                {t('ecoClass', language)}
               </ThemedText>
             </Pressable>
-          )}
-          <Pressable
-            onPress={() => setClassFilter('luxury')}
-            style={[styles.filterChip, classFilter === 'luxury' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
-          >
-            <ThemedText style={[styles.filterChipText, classFilter === 'luxury' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
-              {t('luxClass', language)}
-            </ThemedText>
-          </Pressable>
-        </ScrollView>
-      </View>
+            {activeTab !== 'real_estate' ? (
+              <Pressable
+                onPress={() => setClassFilter('medium')}
+                style={[styles.filterChip, classFilter === 'medium' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
+              >
+                <ThemedText style={[styles.filterChipText, classFilter === 'medium' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
+                  {t('medClass', language)}
+                </ThemedText>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => setClassFilter('business')}
+                style={[styles.filterChip, classFilter === 'business' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
+              >
+                <ThemedText style={[styles.filterChipText, classFilter === 'business' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
+                  {t('busClass', language)}
+                </ThemedText>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={() => setClassFilter('luxury')}
+              style={[styles.filterChip, classFilter === 'luxury' && [styles.filterChipActive, { backgroundColor: theme.accent }]]}
+            >
+              <ThemedText style={[styles.filterChipText, classFilter === 'luxury' ? { color: '#000', fontWeight: '800' } : { color: theme.textSecondary }]}>
+                {t('luxClass', language)}
+              </ThemedText>
+            </Pressable>
+          </ScrollView>
+        </View>
+      )}
 
       {/* Main Assets List */}
       <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
@@ -235,6 +275,124 @@ export default function AssetsScreen() {
           currentList.map((item) => {
             const canBuy = capital >= item.cost;
             
+            if (activeTab === 'garage') {
+              // Unified Garage Item Render
+              const isRE = 'location' in item; // Real estate has 'location' field
+              const refund = Math.round(item.cost * 0.7);
+              
+              const handleSell = () => {
+                Alert.alert(
+                  language === 'ru' ? 'Продажа имущества' : 'Sell Asset',
+                  language === 'ru' 
+                    ? `Вы действительно хотите продать ${item.name} за ${formatCurrency(refund)}? Комиссия за продажу составляет 30%.` 
+                    : `Are you sure you want to sell ${item.name} for ${formatCurrency(refund)}? Resale commission is 30%.`,
+                  [
+                    { text: language === 'ru' ? 'Отмена' : 'Cancel', style: 'cancel' },
+                    { 
+                      text: language === 'ru' ? 'Продать' : 'Sell', 
+                      style: 'destructive',
+                      onPress: () => {
+                        if (isRE) {
+                          sellRealEstate(item.id);
+                        } else {
+                          sellLuxury(item.id);
+                        }
+                      }
+                    }
+                  ]
+                );
+              };
+
+              let categoryLabel = '';
+              let assetIcon = null;
+              
+              if (isRE) {
+                categoryLabel = language === 'ru' ? 'Недвижимость' : 'Real Estate';
+                assetIcon = <Building2 size={12} color={theme.green} />;
+              } else {
+                const lux = item as typeof luxury[0];
+                if (lux.category === 'car') {
+                  categoryLabel = language === 'ru' ? 'Автомобиль' : 'Car';
+                  assetIcon = <Car size={12} color={theme.accent} />;
+                } else if (lux.category === 'yacht') {
+                  categoryLabel = language === 'ru' ? 'Яхта' : 'Yacht';
+                  assetIcon = <Ship size={12} color={theme.accent} />;
+                } else if (lux.category === 'plane') {
+                  categoryLabel = language === 'ru' ? 'Самолет' : 'Plane';
+                  assetIcon = <Plane size={12} color={theme.accent} />;
+                } else {
+                  categoryLabel = language === 'ru' ? 'Драгоценность' : 'Jewelry';
+                  assetIcon = <Gem size={12} color="#627EEA" />;
+                }
+              }
+
+              return (
+                <LedgerCard
+                  key={item.id}
+                  title={item.name}
+                  rightTitle={`×${item.count}`}
+                  borderAccentColor={theme.red}
+                >
+                  <View style={styles.cardContent}>
+                    {item.imageUrl && (
+                      <SafeImage
+                        uri={item.imageUrl}
+                        fallback="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=500&auto=format&fit=crop&q=60"
+                        style={styles.assetImage}
+                      />
+                    )}
+
+                    <View style={styles.locationRow}>
+                      {assetIcon}
+                      <ThemedText type="small" themeColor="textSecondary" style={{ marginLeft: 4 }}>
+                        {categoryLabel} {isRE ? `— ${(item as any).location}` : ''}
+                      </ThemedText>
+                    </View>
+
+                    <View style={styles.statsRow}>
+                      <View style={[styles.statBox, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+                        <ThemedText style={styles.statLabel}>
+                          {isRE ? (language === 'ru' ? 'ДОХОД/СЕК' : 'RENT/S') : (language === 'ru' ? 'ПРЕСТИЖ' : 'PRESTIGE')}
+                        </ThemedText>
+                        <ThemedText style={[styles.statValue, { color: isRE ? theme.green : theme.accent }]}>
+                          {isRE ? `+${formatCurrency((item as any).rent)}/s` : `+${(item as any).prestige.toLocaleString()} pts`}
+                        </ThemedText>
+                      </View>
+                      
+                      <View style={[styles.statBox, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+                        <ThemedText style={styles.statLabel}>{language === 'ru' ? 'КОЛИЧЕСТВО' : 'OWNED'}</ThemedText>
+                        <ThemedText style={[styles.statValue, { color: theme.text }]}>
+                          {item.count}
+                        </ThemedText>
+                      </View>
+
+                      <View style={[styles.statBox, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}>
+                        <ThemedText style={styles.statLabel}>{language === 'ru' ? 'ОБЩИЙ ЭФФЕКТ' : 'TOTAL EFFECT'}</ThemedText>
+                        <ThemedText style={[styles.statValue, { color: isRE ? theme.green : theme.accent, fontSize: 10 }]}>
+                          {isRE ? `+${formatCurrency((item as any).rent * item.count)}/s` : `+${((item as any).prestige * item.count).toLocaleString()} pts`}
+                        </ThemedText>
+                      </View>
+                    </View>
+
+                    <Pressable
+                      onPress={handleSell}
+                      style={({ pressed }) => [
+                        styles.buyBtn,
+                        { backgroundColor: theme.red + '15', borderColor: theme.red, opacity: pressed ? 0.8 : 1 },
+                      ]}
+                    >
+                      <ThemedText style={[styles.buyBtnLabel, { color: theme.red }]}>
+                        {language === 'ru' ? 'ПРОДАТЬ' : 'SELL ASSET'}
+                      </ThemedText>
+                      <ThemedText style={[styles.buyBtnCost, { color: theme.red }]}>
+                        +{formatCurrency(refund)}
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                </LedgerCard>
+              );
+            }
+
             if (activeTab === 'real_estate') {
               // Real Estate Render (contains upgrades and rent yields)
               const r = item as typeof realEstate[0];

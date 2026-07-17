@@ -88,7 +88,7 @@ export interface Luxury {
   prestige: number;
   count: number;
   icon: string;
-  category?: 'car' | 'plane' | 'jewelry' | 'luxury';
+  category?: 'car' | 'plane' | 'jewelry' | 'yacht' | 'luxury';
   class?: 'economy' | 'medium' | 'luxury' | 'collectible';
   imageUrl?: string;
 }
@@ -265,6 +265,10 @@ export interface GameState {
   speedUpSkyscraper: (projectId: string) => void;
   speedUpCinemaScreening: () => void;
   speedUpCarRepair: (carId: string) => void;
+  getITProjectSpeedUpCost: (projectId: string) => number;
+  getSkyscraperSpeedUpCost: (projectId: string) => number;
+  getCinemaSpeedUpCost: () => number;
+  getCarRepairSpeedUpCost: (carId: string) => number;
 
   // Actions — Business
   clickVault: () => void;
@@ -322,6 +326,8 @@ export interface GameState {
   upgradeProperty: (id: string) => void;
   buyLuxury: (id: string) => void;
   buyNFT: (id: string) => void;
+  sellRealEstate: (id: string) => void;
+  sellLuxury: (id: string) => void;
 
   // Daily Reward claim
   claimDailyReward: () => void;
@@ -612,6 +618,14 @@ export const ACHIEVEMENT_DEFINITIONS: {
   { id: 'crypto_baron', titleEn: 'Crypto Baron', titleRu: 'Крипто-барон', descEn: 'Own over 10 Bitcoins (BTC)', descRu: 'Имейте на балансе более 10 Bitcoin (BTC)', icon: 'bitcoin', condition: (s) => s.crypto.find(c => c.symbol === 'BTC')?.coinsOwned ? s.crypto.find(c => c.symbol === 'BTC')!.coinsOwned >= 10 : false },
   { id: 'sky_builder', titleEn: 'Sky Builder', titleRu: 'Небесный строитель', descEn: 'Successfully build your first Skyscraper project', descRu: 'Успешно завершите строительство небоскреба', icon: 'home', condition: (s) => s.skyscraperProjects.some(p => p.status === 'completed') },
   { id: 'mars_settler', titleEn: 'Mars Settler', titleRu: 'Колонизатор Марса', descEn: 'Launch a Space Agency mission to Mars', descRu: 'Успешно запустите космическую миссию на Марс', icon: 'star', condition: (s) => s.prestige >= 2500 },
+  { id: 'own_bugatti', titleEn: 'Bugatti Collector', titleRu: 'Коллекционер Bugatti', descEn: 'Own a Bugatti Atlantic', descRu: 'Купите легендарный Bugatti Atlantic', icon: 'car', condition: (s) => s.luxury.some(l => l.id.includes('bugatti_type_57') && l.count > 0) },
+  { id: 'own_yacht_royal', titleEn: 'Royal Captain', titleRu: 'Королевский Капитан', descEn: 'Own a Monaco Royal Yacht', descRu: 'Купите Monaco Royal Yacht', icon: 'ship', condition: (s) => s.luxury.some(l => l.id.includes('monaco_royal_yacht') && l.count > 0) },
+  { id: 'own_antilia', titleEn: 'Antilia Resident', titleRu: 'Владелец дворца', descEn: 'Own the Antilia Skyscraper', descRu: 'Купите небоскреб Антилия', icon: 'building', condition: (s) => s.realEstate.some(r => r.id.includes('antilia') && r.count > 0) },
+  { id: 'garage_baron', titleEn: 'Garage Baron', titleRu: 'Барон Гаража', descEn: 'Own at least 15 assets simultaneously', descRu: 'Соберите 15 объектов имущества в гараже', icon: 'vault', condition: (s) => {
+    const reCount = s.realEstate.reduce((sum, r) => sum + r.count, 0);
+    const luxCount = s.luxury.reduce((sum, l) => sum + l.count, 0);
+    return (reCount + luxCount) >= 15;
+  }},
 ];
 
 const INITIAL_ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_DEFINITIONS.map(def => ({
@@ -813,13 +827,47 @@ export const useGameStore = create<GameState>()(
         get().checkAchievements();
       },
 
+      getITProjectSpeedUpCost: (projectId: string) => {
+        const proj = get().itProjects.find(p => p.id === projectId);
+        if (!proj || proj.status !== 'running') return 0;
+        const remainingSeconds = proj.duration - proj.progress;
+        if (remainingSeconds <= 0) return 0;
+        return Math.round(proj.payout * 3.5 * (remainingSeconds / proj.duration) + proj.payout * 0.85);
+      },
+
+      getSkyscraperSpeedUpCost: (projectId: string) => {
+        const proj = get().skyscraperProjects.find(p => p.id === projectId);
+        if (!proj || proj.status !== 'building') return 0;
+        const remainingSeconds = proj.duration - proj.progress;
+        if (remainingSeconds <= 0) return 0;
+        return Math.round(proj.payout * 3.5 * (remainingSeconds / proj.duration) + proj.payout * 0.85);
+      },
+
+      getCinemaSpeedUpCost: () => {
+        const state = get();
+        if (!state.cinemaMovieActive) return 0;
+        const remainingSeconds = state.cinemaMovieDuration - state.cinemaMovieProgress;
+        if (remainingSeconds <= 0) return 0;
+        const cinema = state.businesses.find(b => b.id === 'cinema');
+        const count = cinema ? cinema.count : 0;
+        const level = cinema ? cinema.level : 1;
+        const payout = 12000 * count * level;
+        return Math.round(payout * 3.5 * (remainingSeconds / state.cinemaMovieDuration) + payout * 0.85);
+      },
+
+      getCarRepairSpeedUpCost: (carId: string) => {
+        const car = get().flippedCars.find(c => c.id === carId);
+        if (!car || car.status !== 'repairing') return 0;
+        const remainingSeconds = car.repairTime - car.repairProgress;
+        if (remainingSeconds <= 0) return 0;
+        return Math.round(car.repairCost * 4.5 * (remainingSeconds / car.repairTime) + car.repairCost * 1.2);
+      },
+
       speedUpITProject: (projectId: string) => {
         set((state) => {
           const proj = state.itProjects.find(p => p.id === projectId);
           if (!proj || proj.status !== 'running') return {};
-          const remainingSeconds = proj.duration - proj.progress;
-          if (remainingSeconds <= 0) return {};
-          const cost = Math.round(remainingSeconds * (proj.payout / proj.duration) * 1.5);
+          const cost = get().getITProjectSpeedUpCost(projectId);
           if (state.capital < cost) return {};
           
           return {
@@ -836,9 +884,7 @@ export const useGameStore = create<GameState>()(
         set((state) => {
           const proj = state.skyscraperProjects.find(p => p.id === projectId);
           if (!proj || proj.status !== 'building') return {};
-          const remainingSeconds = proj.duration - proj.progress;
-          if (remainingSeconds <= 0) return {};
-          const cost = Math.round(remainingSeconds * (proj.payout / proj.duration) * 1.5);
+          const cost = get().getSkyscraperSpeedUpCost(projectId);
           if (state.capital < cost) return {};
           
           return {
@@ -854,14 +900,12 @@ export const useGameStore = create<GameState>()(
       speedUpCinemaScreening: () => {
         set((state) => {
           if (!state.cinemaMovieActive) return {};
-          const remainingSeconds = state.cinemaMovieDuration - state.cinemaMovieProgress;
-          if (remainingSeconds <= 0) return {};
+          const cost = get().getCinemaSpeedUpCost();
+          if (state.capital < cost) return {};
           const cinema = state.businesses.find(b => b.id === 'cinema');
           const count = cinema ? cinema.count : 0;
           const level = cinema ? cinema.level : 1;
           const payout = 12000 * count * level;
-          const cost = Math.round(remainingSeconds * (payout / state.cinemaMovieDuration) * 1.5);
-          if (state.capital < cost) return {};
           
           return {
             capital: state.capital - cost + payout,
@@ -879,9 +923,7 @@ export const useGameStore = create<GameState>()(
         set((state) => {
           const car = state.flippedCars.find(c => c.id === carId);
           if (!car || car.status !== 'repairing') return {};
-          const remainingSeconds = car.repairTime - car.repairProgress;
-          if (remainingSeconds <= 0) return {};
-          const cost = Math.round(remainingSeconds * (car.repairCost / car.repairTime) * 2) + 500;
+          const cost = get().getCarRepairSpeedUpCost(carId);
           if (state.capital < cost) return {};
           
           return {
@@ -1513,6 +1555,45 @@ export const useGameStore = create<GameState>()(
         get().checkAchievements();
       },
 
+      sellRealEstate: (id: string) => {
+        set((state) => {
+          const target = state.realEstate.find((r) => r.id === id);
+          if (!target || target.count <= 0) return {};
+          const refund = Math.round(target.cost * 0.7);
+          const nextCount = target.count - 1;
+          const original = INITIAL_REAL_ESTATE.find(item => item.id === id);
+          return {
+            capital: state.capital + refund,
+            realEstate: state.realEstate.map((r) =>
+              r.id === id ? { 
+                ...r, 
+                count: nextCount, 
+                upgradeLevel: nextCount === 0 ? 1 : r.upgradeLevel,
+                upgradeCost: nextCount === 0 ? (original?.upgradeCost || r.cost * 0.5) : r.upgradeCost,
+                rent: nextCount === 0 ? (original?.rent || r.rent) : r.rent
+              } : r
+            ),
+            lastActive: Date.now(),
+          };
+        });
+      },
+
+      sellLuxury: (id: string) => {
+        set((state) => {
+          const target = state.luxury.find((l) => l.id === id);
+          if (!target || target.count <= 0) return {};
+          const refund = Math.round(target.cost * 0.7);
+          return {
+            capital: state.capital + refund,
+            prestige: Math.max(0, state.prestige - target.prestige),
+            luxury: state.luxury.map((l) =>
+              l.id === id ? { ...l, count: l.count - 1 } : l
+            ),
+            lastActive: Date.now(),
+          };
+        });
+      },
+
       buyNFT: (id: string) => {
         set((state) => {
           const target = state.nfts.find(n => n.id === id);
@@ -2008,6 +2089,26 @@ export const useGameStore = create<GameState>()(
               });
             } else {
               state.businesses = INITIAL_BUSINESSES;
+            }
+
+            if (state.achievements) {
+              state.achievements = ACHIEVEMENT_DEFINITIONS.map(newItem => {
+                const existing = state.achievements.find(a => a.id === newItem.id);
+                return {
+                  id: newItem.id,
+                  title: newItem.titleEn,
+                  description: newItem.descEn,
+                  titleEn: newItem.titleEn,
+                  titleRu: newItem.titleRu,
+                  descEn: newItem.descEn,
+                  descRu: newItem.descRu,
+                  unlocked: existing ? existing.unlocked : false,
+                  unlockedAt: existing ? existing.unlockedAt : undefined,
+                  icon: newItem.icon,
+                };
+              });
+            } else {
+              state.achievements = INITIAL_ACHIEVEMENTS;
             }
           } catch (e) {
             console.warn('Rehydration migration failed', e);

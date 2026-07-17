@@ -133,6 +133,10 @@ export default function BusinessesScreen() {
   const speedUpSkyscraper = useGameStore((state) => state.speedUpSkyscraper);
   const speedUpCinemaScreening = useGameStore((state) => state.speedUpCinemaScreening);
   const speedUpCarRepair = useGameStore((state) => state.speedUpCarRepair);
+  const getITProjectSpeedUpCost = useGameStore((state) => state.getITProjectSpeedUpCost);
+  const getSkyscraperSpeedUpCost = useGameStore((state) => state.getSkyscraperSpeedUpCost);
+  const getCinemaSpeedUpCost = useGameStore((state) => state.getCinemaSpeedUpCost);
+  const getCarRepairSpeedUpCost = useGameStore((state) => state.getCarRepairSpeedUpCost);
 
   // Routing Views state
   const [activeView, setActiveView] = useState<'list' | 'naming' | 'details'>('list');
@@ -826,7 +830,7 @@ export default function BusinessesScreen() {
                               {language === 'ru' ? `До окончания: ${Math.round(cinemaMovieDuration - cinemaMovieProgress)}с` : `Completes in ${Math.round(cinemaMovieDuration - cinemaMovieProgress)}s`}
                             </ThemedText>
                             <Pressable
-                              disabled={capital < Math.round((cinemaMovieDuration - cinemaMovieProgress) * 125)}
+                              disabled={capital < getCinemaSpeedUpCost()}
                               onPress={speedUpCinemaScreening}
                               style={({ pressed }) => [
                                 {
@@ -834,14 +838,14 @@ export default function BusinessesScreen() {
                                   paddingVertical: 4,
                                   borderRadius: 4,
                                   borderWidth: 1,
-                                  borderColor: capital >= Math.round((cinemaMovieDuration - cinemaMovieProgress) * 125) ? theme.green : theme.border,
-                                  backgroundColor: capital >= Math.round((cinemaMovieDuration - cinemaMovieProgress) * 125) ? theme.green + '15' : 'transparent',
+                                  borderColor: capital >= getCinemaSpeedUpCost() ? theme.green : theme.border,
+                                  backgroundColor: capital >= getCinemaSpeedUpCost() ? theme.green + '15' : 'transparent',
                                   opacity: pressed ? 0.7 : 1,
                                 }
                               ]}
                             >
-                              <ThemedText style={{ fontSize: 8, fontWeight: '800', color: capital >= Math.round((cinemaMovieDuration - cinemaMovieProgress) * 125) ? theme.green : theme.textSecondary }}>
-                                ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(Math.round((cinemaMovieDuration - cinemaMovieProgress) * 125))})
+                              <ThemedText style={{ fontSize: 8, fontWeight: '800', color: capital >= getCinemaSpeedUpCost() ? theme.green : theme.textSecondary }}>
+                                ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(getCinemaSpeedUpCost())})
                               </ThemedText>
                             </Pressable>
                           </View>
@@ -1038,7 +1042,7 @@ export default function BusinessesScreen() {
                               <View style={{ alignItems: 'flex-end', gap: 4 }}>
                                 <ThemedText style={{ fontSize: 9, color: theme.accent, fontWeight: '800' }}>{Math.round(proj.duration - proj.progress)}s</ThemedText>
                                 <Pressable
-                                  disabled={capital < Math.round((proj.duration - proj.progress) * 65000)}
+                                  disabled={capital < getITProjectSpeedUpCost(proj.id)}
                                   onPress={() => speedUpITProject(proj.id)}
                                   style={({ pressed }) => [
                                     {
@@ -1046,14 +1050,14 @@ export default function BusinessesScreen() {
                                       paddingVertical: 3,
                                       borderRadius: 4,
                                       borderWidth: 1,
-                                      borderColor: capital >= Math.round((proj.duration - proj.progress) * 65000) ? theme.green : theme.border,
-                                      backgroundColor: capital >= Math.round((proj.duration - proj.progress) * 65000) ? theme.green + '15' : 'transparent',
+                                      borderColor: capital >= getITProjectSpeedUpCost(proj.id) ? theme.green : theme.border,
+                                      backgroundColor: capital >= getITProjectSpeedUpCost(proj.id) ? theme.green + '15' : 'transparent',
                                       opacity: pressed ? 0.7 : 1,
                                     }
                                   ]}
                                 >
-                                  <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= Math.round((proj.duration - proj.progress) * 65000) ? theme.green : theme.textSecondary }}>
-                                    ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(Math.round((proj.duration - proj.progress) * 65000))})
+                                  <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= getITProjectSpeedUpCost(proj.id) ? theme.green : theme.textSecondary }}>
+                                    ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(getITProjectSpeedUpCost(proj.id))})
                                   </ThemedText>
                                 </Pressable>
                               </View>
@@ -1099,7 +1103,7 @@ export default function BusinessesScreen() {
                               <View style={{ alignItems: 'flex-end', gap: 4 }}>
                                 <ThemedText style={{ fontSize: 9, color: theme.accent, fontWeight: '800' }}>{Math.round(sky.duration - sky.progress)}s</ThemedText>
                                 <Pressable
-                                  disabled={capital < Math.round((sky.duration - sky.progress) * 98000)}
+                                  disabled={capital < getSkyscraperSpeedUpCost(sky.id)}
                                   onPress={() => speedUpSkyscraper(sky.id)}
                                   style={({ pressed }) => [
                                     {
@@ -1107,14 +1111,14 @@ export default function BusinessesScreen() {
                                       paddingVertical: 3,
                                       borderRadius: 4,
                                       borderWidth: 1,
-                                      borderColor: capital >= Math.round((sky.duration - sky.progress) * 98000) ? theme.green : theme.border,
-                                      backgroundColor: capital >= Math.round((sky.duration - sky.progress) * 98000) ? theme.green + '15' : 'transparent',
+                                      borderColor: capital >= getSkyscraperSpeedUpCost(sky.id) ? theme.green : theme.border,
+                                      backgroundColor: capital >= getSkyscraperSpeedUpCost(sky.id) ? theme.green + '15' : 'transparent',
                                       opacity: pressed ? 0.7 : 1,
                                     }
                                   ]}
                                 >
-                                  <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= Math.round((sky.duration - sky.progress) * 98000) ? theme.green : theme.textSecondary }}>
-                                    ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(Math.round((sky.duration - sky.progress) * 98000))})
+                                  <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= getSkyscraperSpeedUpCost(sky.id) ? theme.green : theme.textSecondary }}>
+                                    ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(getSkyscraperSpeedUpCost(sky.id))})
                                   </ThemedText>
                                 </Pressable>
                               </View>
@@ -1181,7 +1185,7 @@ export default function BusinessesScreen() {
                                 <View style={{ alignItems: 'flex-end', gap: 4 }}>
                                   <ThemedText style={{ fontSize: 9, color: theme.accent, fontWeight: '800' }}>{Math.round(car.repairTime - car.repairProgress)}s</ThemedText>
                                   <Pressable
-                                    disabled={capital < Math.round((car.repairTime - car.repairProgress) * 22000)}
+                                    disabled={capital < getCarRepairSpeedUpCost(car.id)}
                                     onPress={() => speedUpCarRepair(car.id)}
                                     style={({ pressed }) => [
                                       {
@@ -1189,14 +1193,14 @@ export default function BusinessesScreen() {
                                         paddingVertical: 3,
                                         borderRadius: 4,
                                         borderWidth: 1,
-                                        borderColor: capital >= Math.round((car.repairTime - car.repairProgress) * 22000) ? theme.green : theme.border,
-                                        backgroundColor: capital >= Math.round((car.repairTime - car.repairProgress) * 22000) ? theme.green + '15' : 'transparent',
+                                        borderColor: capital >= getCarRepairSpeedUpCost(car.id) ? theme.green : theme.border,
+                                        backgroundColor: capital >= getCarRepairSpeedUpCost(car.id) ? theme.green + '15' : 'transparent',
                                         opacity: pressed ? 0.7 : 1,
                                       }
                                     ]}
                                   >
-                                    <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= Math.round((car.repairTime - car.repairProgress) * 22000) ? theme.green : theme.textSecondary }}>
-                                      ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(Math.round((car.repairTime - car.repairProgress) * 22000))})
+                                    <ThemedText style={{ fontSize: 7.5, fontWeight: '800', color: capital >= getCarRepairSpeedUpCost(car.id) ? theme.green : theme.textSecondary }}>
+                                      ⚡ {language === 'ru' ? 'УСКОРИТЬ' : 'SPEED UP'} ({formatCurrency(getCarRepairSpeedUpCost(car.id))})
                                     </ThemedText>
                                   </Pressable>
                                 </View>
