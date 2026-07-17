@@ -64,7 +64,7 @@ export const LOCAL_IMAGES: Record<string, any> = {
   "LuxeClassAuto/Porsche Panamera.jpg": require("../images/LuxeClassAuto/Porsche Panamera.jpg"),
   "LuxeClassAuto/Range Rover SV.jpg": require("../images/LuxeClassAuto/Range Rover SV.jpg"),
   "LuxeClassAuto/Rolls-Royce Ghost.jpg": require("../images/LuxeClassAuto/Rolls-Royce Ghost.jpg"),
-  "LuxeClassAuto/Rolls-Royce Phantom": require("../images/LuxeClassAuto/Rolls-Royce Phantom"),
+  "LuxeClassAuto/Rolls-Royce Phantom.jpg": require("../images/LuxeClassAuto/Rolls-Royce Phantom.jpg"),
   "LuxeClassHouse/Alpine Luxury Chalet.jpg": require("../images/LuxeClassHouse/Alpine Luxury Chalet.jpg"),
   "LuxeClassHouse/Antilia, Mumbai, India.jpg": require("../images/LuxeClassHouse/Antilia, Mumbai, India.jpg"),
   "LuxeClassHouse/Beverly Hills Mansion.jpg": require("../images/LuxeClassHouse/Beverly Hills Mansion.jpg"),

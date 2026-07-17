@@ -856,7 +856,7 @@ export const INITIAL_LUXURY: Luxury[] = [
     "icon": "car",
     "category": "car",
     "class": "luxury",
-    "imageUrl": "LuxeClassAuto/Rolls-Royce Phantom"
+    "imageUrl": "LuxeClassAuto/Rolls-Royce Phantom.jpg"
   },
   {
     "id": "car_ultraluxury_aston_martin_valkyrie",
