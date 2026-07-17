@@ -9,22 +9,31 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#111827',              // Gray-900 — crisp dark text
+    background: '#F9FAFB',        // Gray-50 — soft off-white
+    backgroundElement: '#FFFFFF', // Pure white cards
+    backgroundSelected: '#F3F4F6', // Gray-100 — subtle highlight
+    textSecondary: '#6B7280',     // Gray-500 — muted labels
+    accent: '#059669',            // Emerald-600 — primary brand
+    green: '#059669',             // Emerald-600 — profit/success
+    red: '#EF4444',               // Red-500 — loss/danger
+    border: 'rgba(17, 24, 39, 0.08)',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#F9FAFB',              // Gray-50 — bright white text
+    background: '#111827',        // Gray-900 — deep charcoal
+    backgroundElement: '#1F2937', // Gray-800 — elevated surface
+    backgroundSelected: '#374151', // Gray-700 — selection highlight
+    textSecondary: '#9CA3AF',     // Gray-400 — muted labels
+    accent: '#10B981',            // Emerald-500 — primary brand
+    green: '#34D399',             // Emerald-400 — profit/success
+    red: '#F87171',               // Red-400 — loss/danger
+    border: 'rgba(255, 255, 255, 0.10)',
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors.light;
+
 
 export const Fonts = Platform.select({
   ios: {
