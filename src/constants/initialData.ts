@@ -449,7 +449,7 @@ export const INITIAL_LUXURY: Luxury[] = [
     "icon": "car",
     "category": "car",
     "class": "economy",
-    "imageUrl": "EconomClassAuto/Skoda Rapid.JPG"
+    "imageUrl": "EconomClassAuto/Skoda Rapid.jpg"
   },
   {
     "id": "car_econom_volkswagen_polo",

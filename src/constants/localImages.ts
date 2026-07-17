@@ -35,7 +35,7 @@ export const LOCAL_IMAGES: Record<string, any> = {
   "EconomClassAuto/Nissan Almera.jpg": require("../images/EconomClassAuto/Nissan Almera.jpg"),
   "EconomClassAuto/Renault Logan.jpg": require("../images/EconomClassAuto/Renault Logan.jpg"),
   "EconomClassAuto/Renault Sandero.jpg": require("../images/EconomClassAuto/Renault Sandero.jpg"),
-  "EconomClassAuto/Skoda Rapid.JPG": require("../images/EconomClassAuto/Skoda Rapid.JPG"),
+  "EconomClassAuto/Skoda Rapid.jpg": require("../images/EconomClassAuto/Skoda Rapid.jpg"),
   "EconomClassAuto/Volkswagen Polo.jpg": require("../images/EconomClassAuto/Volkswagen Polo.jpg"),
   "EconomClassHouse/Barbican Estate — UK.jpg": require("../images/EconomClassHouse/Barbican Estate — UK.jpg"),
   "EconomClassHouse/Dubai Simple Apartment.jpg": require("../images/EconomClassHouse/Dubai Simple Apartment.jpg"),
