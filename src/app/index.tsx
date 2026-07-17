@@ -110,10 +110,10 @@ export default function DashboardScreen() {
 
   const rankNames = {
     en: {
-      universal_emperor: 'Universal Emperor',
-      cosmic_deity: 'Cosmic Deity',
-      multiverse_emperor: 'Multiversal Overlord',
-      emperor: 'Sector Emperor',
+      legendary_capitalist: 'Legendary Capitalist',
+      conglomerate_emperor: 'Apex Conglomerate Emperor',
+      financial_legend: 'Global Financial Legend',
+      magnate: 'Business Magnate',
       galactic_tycoon: 'Galactic Tycoon',
       multitrillionaire: 'Multitrillionaire',
       trillionaire: 'Trillionaire',
@@ -124,10 +124,10 @@ export default function DashboardScreen() {
       novice: 'Novice'
     },
     ru: {
-      universal_emperor: 'Император Вселенной',
-      cosmic_deity: 'Космическое Божество',
-      multiverse_emperor: 'Владыка Мультиверса',
-      emperor: 'Секторный Император',
+      legendary_capitalist: 'Легендарный Капиталист',
+      conglomerate_emperor: 'Глава Конгломерата',
+      financial_legend: 'Легенда Финансового Мира',
+      magnate: 'Бизнес-Магнат',
       galactic_tycoon: 'Галактический Магнат',
       multitrillionaire: 'Мультитриллионер',
       trillionaire: 'Триллионер',
@@ -140,10 +140,10 @@ export default function DashboardScreen() {
   };
   
   const rankKey =
-    netWorth >= 1e18 ? 'universal_emperor' :
-    netWorth >= 100e15 ? 'cosmic_deity' :
-    netWorth >= 10e15 ? 'multiverse_emperor' :
-    netWorth >= 1e15 ? 'emperor' :
+    netWorth >= 1e18 ? 'legendary_capitalist' :
+    netWorth >= 100e15 ? 'conglomerate_emperor' :
+    netWorth >= 10e15 ? 'financial_legend' :
+    netWorth >= 1e15 ? 'magnate' :
     netWorth >= 100e12 ? 'galactic_tycoon' :
     netWorth >= 10e12 ? 'multitrillionaire' :
     netWorth >= 1e12 ? 'trillionaire' :
